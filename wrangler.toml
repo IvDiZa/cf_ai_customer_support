@@ -1,0 +1,12 @@
+name = "cf-ai-customer-support"
+compatibility_date = "2024-01-15"
+main = "worker.js"
+
+[[ai.models]]
+binding = "AI"
+model_id = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+[[kv_namespaces]]
+binding = "KV"
+preview_id = "kv-customer-support"
+id = ""  # You'll fill this in after deployment
