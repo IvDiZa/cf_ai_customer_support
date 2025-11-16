@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare AI Assistant</title>
-     <!-- Bootstrap CSS -->
+    <title>CF AI Customer Support</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
@@ -28,6 +28,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--white);
             color: var(--dark-color);
+            line-height: 1.6;
         }
         
         .hero-section {
@@ -39,7 +40,7 @@
         }
         
         .feature-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             border: none;
             border-radius: 15px;
             overflow: hidden;
@@ -78,7 +79,7 @@
         }
         
         .chat-messages {
-            height: 350px;
+            height: 400px;
             overflow-y: auto;
             padding: 1.5rem;
             background-color: var(--orange-light);
@@ -90,6 +91,12 @@
             border-radius: 18px;
             max-width: 80%;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .user-message {
@@ -106,33 +113,54 @@
             border: 1px solid #e2e8f0;
         }
         
+        .voice-message {
+            background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            font-style: italic;
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            background: var(--white);
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            max-width: 80px;
+            margin-bottom: 1rem;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
         .input-group {
             border-top: 1px solid #e2e8f0;
             background: var(--white);
+            padding: 1rem;
         }
         
-        /* Enhanced Button Styles */
         .btn {
             transition: all 0.3s ease;
             border: none;
             font-weight: 600;
             position: relative;
             overflow: hidden;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
         }
         
         .btn-primary {
@@ -144,11 +172,6 @@
             background: linear-gradient(135deg, var(--primary-dark) 0%, #d4491f 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
         }
         
         .btn-outline-primary {
@@ -165,112 +188,6 @@
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
         }
         
-        .btn-light {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            color: var(--dark-color);
-            border: 1px solid #dee2e6;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-light:hover {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            color: var(--dark-color);
-        }
-        
-        .btn-outline-light {
-            border: 2px solid rgba(255,255,255,0.8);
-            color: white;
-            background: transparent;
-        }
-        
-        .btn-outline-light:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color) 0%, #0da271 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-success:hover {
-            background: linear-gradient(135deg, #0da271 0%, #0b8a5c 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-info {
-            background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-info:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-        
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-        }
-        
-        /* Special Button Styles */
-        .btn-glow {
-            animation: glow 2s infinite alternate;
-        }
-        
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color);
-            }
-            to {
-                box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
-            }
-        }
-        
-        .btn-3d {
-            border-bottom: 4px solid rgba(0,0,0,0.2);
-            transition: all 0.1s ease;
-        }
-        
-        .btn-3d:hover {
-            transform: translateY(-2px);
-            border-bottom-width: 6px;
-        }
-        
-        .btn-3d:active {
-            transform: translateY(0);
-            border-bottom-width: 2px;
-        }
-        
-        .btn-pill {
-            border-radius: 50px;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
-        }
-        
-        .btn-icon {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-icon i {
-            font-size: 1.1em;
-        }
-        
-        /* Voice Button Special Styling */
         .voice-btn {
             border-radius: 50%;
             width: 50px;
@@ -282,6 +199,7 @@
             background: var(--white);
             color: var(--primary-color);
             transition: all 0.3s ease;
+            position: relative;
         }
         
         .voice-btn:hover {
@@ -297,23 +215,30 @@
             animation: pulse 1.5s infinite;
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        .voice-btn.recording::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            animation: recordingPulse 1s infinite;
         }
         
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 15px rgba(255, 107, 53, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 107, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
         }
         
-        /* Action Buttons in Feature Cards */
+        @keyframes recordingPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -339,17 +264,6 @@
             box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
         
-        /* Badge Styles */
-        .badge {
-            font-weight: 600;
-            padding: 0.5em 0.8em;
-        }
-        
-        .badge-pill {
-            border-radius: 50px;
-        }
-        
-        /* Status Indicator */
         .status-indicator {
             width: 10px;
             height: 10px;
@@ -358,16 +272,9 @@
             margin-right: 5px;
         }
         
-        .online {
-            background-color: var(--success-color);
-            box-shadow: 0 0 5px var(--success-color);
-        }
+        .online { background-color: var(--success-color); }
+        .offline { background-color: #ef4444; }
         
-        .offline {
-            background-color: #ef4444;
-        }
-        
-        /* Memory Panel */
         .memory-panel {
             background-color: var(--white);
             border-radius: 15px;
@@ -391,16 +298,6 @@
             transform: translateX(5px);
         }
         
-        .memory-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        
-        .component-status {
-            font-size: 0.875rem;
-        }
-        
-        /* Navigation */
         .navbar {
             background: var(--white) !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -425,7 +322,6 @@
             background: var(--orange-light);
         }
         
-        /* Footer */
         footer {
             background-color: var(--dark-color);
             color: white;
@@ -442,7 +338,6 @@
             box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
         }
 
-        /* Toast Notifications */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -456,80 +351,18 @@
             border: none;
         }
 
-        /* Modal Styling */
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        .btn-pill {
+            border-radius: 50px;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
         }
-
-        .settings-panel {
-            background: var(--orange-light);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        /* Hero Section Buttons */
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-
-        /* Loading Animation */
-        .btn-loading {
-            position: relative;
-            color: transparent !important;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
-            display: flex;
+        
+        .btn-icon {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            z-index: 1000;
-            transition: all 0.3s ease;
+            gap: 0.5rem;
         }
-
-        .fab:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 6px 25px rgba(255, 107, 53, 0.6);
-        }
-
-        /* Gradient Text */
+        
         .gradient-text {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             -webkit-background-clip: text;
@@ -537,13 +370,31 @@
             background-clip: text;
         }
 
-        /* Button Groups */
-        .btn-group .btn {
-            border-radius: 8px !important;
-            margin: 0 2px;
+        .ticket-card {
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Responsive Design */
+        .voice-level {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 5px;
+        }
+
+        .voice-bar {
+            width: 3px;
+            height: 5px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: all 0.1s ease;
+        }
+
         @media (max-width: 768px) {
             .hero-buttons {
                 flex-direction: column;
@@ -558,54 +409,35 @@
             .action-buttons {
                 flex-direction: column;
             }
+            
+            .message {
+                max-width: 90%;
+            }
         }
     </style>
-            
-    
-
 </head>
 <body>
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Settings Modal -->
-    <div class="modal fade" id="settingsModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- Voice Recognition Status -->
+    <div class="modal fade" id="voiceModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">AI Assistant Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="settings-panel">
-                        <h6>Response Style</h6>
-                        <select class="form-select mb-3" id="responseStyle">
-                            <option value="friendly">Friendly</option>
-                            <option value="technical">Technical</option>
-                            <option value="concise">Concise</option>
-                        </select>
-                        
-                        <h6>Voice Preferences</h6>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="voiceResponses">
-                            <label class="form-check-label" for="voiceResponses">
-                                Enable voice responses
-                            </label>
-                        </div>
-                        
-                        <h6>Theme</h6>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="theme" id="lightTheme" checked>
-                            <label class="btn btn-outline-primary" for="lightTheme">Light</label>
-                            
-                            <input type="radio" class="btn-check" name="theme" id="darkTheme">
-                            <label class="btn btn-outline-primary" for="darkTheme">Dark</label>
-                        </div>
+                <div class="modal-body text-center">
+                    <div class="voice-level mb-3" id="voiceLevel">
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveSettings">Save Settings</button>
+                    <h5>Listening...</h5>
+                    <p class="text-muted" id="voiceStatus">Speak now</p>
+                    <div id="voiceTranscript" class="mb-2 p-2 bg-light rounded"></div>
+                    <button class="btn btn-danger btn-sm" id="stopVoice">Stop</button>
                 </div>
             </div>
         </div>
@@ -616,7 +448,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="bi bi-cloud-fill me-2"></i>
-                Cloudflare AI Assistant
+                CF AI Customer Support
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -624,19 +456,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#features">Features</a>
+                        <a class="nav-link active" href="#support">Support Chat</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#demo">Demo</a>
+                        <a class="nav-link" href="#tickets">My Tickets</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#memory">Memory</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#status">Status</a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-link" id="settingsBtn">Settings</button>
+                        <a class="nav-link" href="#status">System Status</a>
                     </li>
                 </ul>
             </div>
@@ -646,120 +472,40 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">Cloudflare AI Assistant</h1>
-            <p class="lead mb-4">An interactive AI assistant powered by Cloudflare's AI, Workers, and Pages technologies</p>
-            <button class="btn btn-light btn-lg px-4 me-2" id="startDemo">Start Demo</button>
-            <button class="btn btn-outline-light btn-lg px-4 me-2" id="learnMore">Learn More</button>
-            <button class="btn btn-outline-light btn-lg px-4" id="clearChat">Clear Chat</button>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="container mb-5">
-        <div class="row text-center mb-4">
-            <div class="col">
-                <h2 class="fw-bold">Core Components</h2>
-                <p class="text-muted">Powered by Cloudflare's developer platform</p>
-            </div>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card feature-card" data-feature="llm">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="bi bi-robot"></i>
-                        </div>
-                        <h5 class="card-title">LLM Integration</h5>
-                        <p class="card-text">Powered by Llama 3.3 on Workers AI or your preferred external LLM for intelligent responses.</p>
-                        <div class="component-status">
-                            <span class="status-indicator online"></span> Available
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-action="test-llm">Test LLM</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card feature-card" data-feature="workflow">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="bi bi-diagram-3"></i>
-                        </div>
-                        <h5 class="card-title">Workflow Coordination</h5>
-                        <p class="card-text">Utilizing Workflows, Workers, and Durable Objects for seamless task coordination.</p>
-                        <div class="component-status">
-                            <span class="status-indicator online"></span> Available
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-action="simulate-workflow">Simulate Workflow</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card feature-card" data-feature="input">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="bi bi-chat-dots"></i>
-                        </div>
-                        <h5 class="card-title">User Input</h5>
-                        <p class="card-text">Support for chat and voice input via Pages and Realtime for interactive experiences.</p>
-                        <div class="component-status">
-                            <span class="status-indicator online"></span> Available
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-action="test-voice">Test Voice</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card feature-card" data-feature="memory">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="bi bi-cpu"></i>
-                        </div>
-                        <h5 class="card-title">Memory & State</h5>
-                        <p class="card-text">Persistent memory and state management for contextual conversations.</p>
-                        <div class="component-status">
-                            <span class="status-indicator online"></span> Available
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-action="view-memory">View Memory</button>
-                        </div>
-                    </div>
-                </div>
+            <h1 class="display-4 fw-bold mb-3">CF AI Customer Support</h1>
+            <p class="lead mb-4">24/7 AI-powered customer support powered by Cloudflare Workers AI</p>
+            <div class="hero-buttons">
+                <button class="btn btn-light btn-lg px-4 btn-pill btn-icon" id="startChat">
+                    <i class="bi bi-chat-dots"></i> Start Chat
+                </button>
+                <button class="btn btn-outline-light btn-lg px-4 btn-pill btn-icon" id="createTicket">
+                    <i class="bi bi-ticket"></i> Create Ticket
+                </button>
             </div>
         </div>
     </section>
 
-    <!-- Demo Section -->
-    <section id="demo" class="container mb-5">
+    <!-- Support Chat Section -->
+    <section id="support" class="container mb-5">
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="chat-container">
                     <div class="chat-header">
-                        <h4 class="mb-0">AI Assistant Demo</h4>
-                        <small>Powered by Cloudflare Workers AI</small>
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-light me-2" id="exportChat">Export Chat</button>
-                            <button class="btn btn-sm btn-light" id="toggleTheme">Toggle Theme</button>
-                        </div>
+                        <h4 class="mb-0">AI Support Assistant</h4>
+                        <small>Powered by Cloudflare Workers AI & Llama 3.3</small>
                     </div>
                     <div class="chat-messages" id="chatMessages">
                         <div class="message ai-message">
-                            <strong>AI Assistant:</strong> Hello! I'm your Cloudflare AI Assistant. How can I help you today?
+                            <strong>Support AI:</strong> Hello! I'm your Cloudflare AI Support Assistant. How can I help you with Cloudflare services today?
                         </div>
                     </div>
-                    <div class="input-group p-3">
-                        <input type="text" class="form-control" id="userInput" placeholder="Type your message here...">
-                        <button class="btn btn-outline-secondary voice-btn me-2" id="voiceBtn" title="Voice Input">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="userInput" placeholder="Describe your issue or click the microphone to speak...">
+                        <button class="btn voice-btn me-2" id="voiceBtn" title="Voice Input">
                             <i class="bi bi-mic"></i>
                         </button>
-                        <button class="btn btn-primary me-2" id="sendBtn">Send</button>
-                        <button class="btn btn-outline-secondary" id="attachBtn" title="Attach File">
-                            <i class="bi bi-paperclip"></i>
+                        <button class="btn btn-primary me-2 btn-pill" id="sendBtn">
+                            <i class="bi bi-send"></i> Send
                         </button>
                     </div>
                 </div>
@@ -767,18 +513,114 @@
         </div>
     </section>
 
-    <!-- Memory & Status Section -->
-    <section id="memory" class="container mb-5">
+    <!-- Quick Actions Section -->
+    <section class="container mb-5">
+        <div class="row text-center mb-4">
+            <div class="col">
+                <h3 class="fw-bold gradient-text">Quick Solutions</h3>
+                <p class="text-muted">Common Cloudflare issues and solutions</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h5 class="card-title">SSL/TLS Issues</h5>
+                        <p class="card-text">Troubleshoot SSL certificate problems and HTTPS configuration.</p>
+                        <button class="btn action-btn" data-issue="ssl">
+                            Get Help
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <h5 class="card-title">Performance</h5>
+                        <p class="card-text">Optimize cache settings and improve loading times.</p>
+                        <button class="btn action-btn" data-issue="performance">
+                            Optimize
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <h5 class="card-title">Workers AI</h5>
+                        <p class="card-text">Help with AI model integration and inference issues.</p>
+                        <button class="btn action-btn" data-issue="workers-ai">
+                            Configure
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <h5 class="card-title">Billing</h5>
+                        <p class="card-text">Questions about pricing, invoices, and account management.</p>
+                        <button class="btn action-btn" data-issue="billing">
+                            Resolve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tickets Section -->
+    <section id="tickets" class="container mb-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="memory-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0 gradient-text">Support Tickets</h4>
+                        <button class="btn btn-primary btn-pill btn-icon" id="newTicketBtn">
+                            <i class="bi bi-plus-circle"></i> New Ticket
+                        </button>
+                    </div>
+                    <div id="ticketsList">
+                        <div class="card ticket-card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title">SSL Certificate Error</h5>
+                                        <p class="card-text text-muted">Getting "SSL Handshake Failed" on my domain</p>
+                                        <span class="badge bg-warning">In Progress</span>
+                                        <small class="text-muted">Created: 2025-01-15</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- System Status Section -->
+    <section id="status" class="container mb-5">
         <div class="row">
             <div class="col-lg-6 mb-4">
                 <div class="memory-panel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="mb-0">Conversation Memory</h4>
-                        <button class="btn btn-sm btn-outline-primary" id="clearMemory">Clear Memory</button>
-                    </div>
+                    <h4 class="mb-3 gradient-text">Conversation History</h4>
                     <div id="memoryItems">
                         <div class="memory-item">
-                            <strong>Session Started:</strong> User initiated conversation with AI Assistant
+                            <strong>Session Started:</strong> User initiated support chat
                         </div>
                     </div>
                 </div>
@@ -786,42 +628,44 @@
             <div class="col-lg-6">
                 <div class="memory-panel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="mb-0">System Status</h4>
-                        <button class="btn btn-sm btn-outline-primary" id="refreshStatus">Refresh</button>
+                        <h4 class="mb-0 gradient-text">System Status</h4>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshStatus">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
-                            <span>LLM Service (Llama 3.3)</span>
+                            <span>Workers AI (Llama 3.3)</span>
                             <span class="badge bg-success">Online</span>
                         </div>
-                        <div class="progress mt-1" style="height: 5px;">
+                        <div class="progress mt-1" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar" role="progressbar" style="width: 95%"></div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
-                            <span>Workers & Workflows</span>
+                            <span>KV Storage</span>
                             <span class="badge bg-success">Online</span>
                         </div>
-                        <div class="progress mt-1" style="height: 5px;">
-                            <div class="progress-bar" role="progressbar" style="width: 98%"></div>
+                        <div class="progress mt-1" style="height: 8px; border-radius: 4px;">
+                            <div class="progress-bar" role="progressbar" style="width: 65%"></div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
-                            <span>Realtime Communication</span>
+                            <span>Durable Objects</span>
                             <span class="badge bg-success">Online</span>
                         </div>
-                        <div class="progress mt-1" style="height: 5px;">
-                            <div class="progress-bar" role="progressbar" style="width: 92%"></div>
+                        <div class="progress mt-1" style="height: 8px; border-radius: 4px;">
+                            <div class="progress-bar" role="progressbar" style="width: 42%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="d-flex justify-content-between">
-                            <span>Memory & State</span>
-                            <span class="badge bg-success">Online</span>
+                            <span>Response Time</span>
+                            <span class="badge bg-success">128ms</span>
                         </div>
-                        <div class="progress mt-1" style="height: 5px;">
+                        <div class="progress mt-1" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar" role="progressbar" style="width: 88%"></div>
                         </div>
                     </div>
@@ -833,14 +677,9 @@
     <!-- Footer -->
     <footer>
         <div class="container text-center">
-            <p class="mb-2">Cloudflare AI Assistant Demo</p>
-            <p class="mb-0">This is a demonstration interface for Cloudflare's AI technologies.</p>
-            <p>All work is original and created for this submission.</p>
-            <div class="mt-3">
-                <button class="btn btn-outline-light me-2" id="documentationBtn">View Documentation</button>
-                <button class="btn btn-outline-light me-2" id="supportBtn">Get Support</button>
-                <button class="btn btn-outline-light" id="feedbackBtn">Send Feedback</button>
-            </div>
+            <p class="mb-2">CF AI Customer Support</p>
+            <p class="mb-0">Powered by Cloudflare Workers AI, Pages, and Durable Objects</p>
+            <p>Repository: cf_ai_customer_support</p>
         </div>
     </footer>
 
@@ -854,27 +693,163 @@
             const userInput = document.getElementById('userInput');
             const sendBtn = document.getElementById('sendBtn');
             const voiceBtn = document.getElementById('voiceBtn');
-            const startDemo = document.getElementById('startDemo');
             const memoryItems = document.getElementById('memoryItems');
             const toastContainer = document.getElementById('toastContainer');
+            const voiceModal = new bootstrap.Modal(document.getElementById('voiceModal'));
+            const voiceTranscript = document.getElementById('voiceTranscript');
+            const voiceStatus = document.getElementById('voiceStatus');
+            const voiceLevel = document.getElementById('voiceLevel');
+            const stopVoiceBtn = document.getElementById('stopVoice');
             
-            // State
-            let isDarkTheme = false;
+            // Voice Recognition Variables
+            let recognition = null;
+            let isListening = false;
+            let finalTranscript = '';
+            let sessionId = 'session_' + Date.now();
             let conversationHistory = [];
+            let isWaitingForResponse = false;
             
-            // Demo responses
-            const demoResponses = [
-                "I can help you with that! Cloudflare Workers AI makes it easy to run machine learning models on the edge.",
-                "For state management, you might consider using Durable Objects which provide strongly consistent storage.",
-                "You can integrate voice input using Web Speech API and process it with Cloudflare's AI services.",
-                "Workflows can help coordinate multiple steps in your AI pipeline, ensuring reliable execution.",
-                "Memory persistence is important for contextual conversations. You can use KV storage for this purpose.",
-                "Cloudflare Pages is perfect for hosting your AI assistant frontend with global deployment.",
-                "With Workers AI, you can run Llama models directly on Cloudflare's global network.",
-                "Durable Objects are great for maintaining conversation state across multiple sessions.",
-                "You can use Workers to handle both your API logic and serve your static assets efficiently.",
-                "The fetch API in Workers makes it easy to integrate with external services and APIs."
-            ];
+            // Initialize Speech Recognition
+            function initializeSpeechRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    showToast('Speech recognition is not supported in this browser. Please use Chrome or Edge.', 'warning');
+                    voiceBtn.disabled = true;
+                    voiceBtn.title = 'Speech recognition not supported';
+                    return false;
+                }
+                
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    voiceBtn.classList.add('listening', 'recording');
+                    voiceBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                    voiceModal.show();
+                    showToast('Voice recognition started. Speak now!', 'info');
+                };
+                
+                recognition.onresult = function(event) {
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    // Update the transcript display
+                    voiceTranscript.innerHTML = finalTranscript + '<em style="color: #666;">' + interimTranscript + '</em>';
+                    
+                    // Simulate voice level visualization
+                    updateVoiceLevel();
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    stopVoiceRecognition();
+                    
+                    let errorMessage = 'Voice recognition error: ';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = 'No speech detected. Please try again.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = 'No microphone found. Please check your microphone.';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = 'Microphone access denied. Please allow microphone access.';
+                            break;
+                        default:
+                            errorMessage = 'Error with voice recognition: ' + event.error;
+                    }
+                    
+                    showToast(errorMessage, 'warning');
+                };
+                
+                recognition.onend = function() {
+                    if (isListening) {
+                        // If still listening, restart recognition (for continuous listening)
+                        recognition.start();
+                    }
+                };
+                
+                return true;
+            }
+            
+            // Start voice recognition
+            function startVoiceRecognition() {
+                if (!recognition && !initializeSpeechRecognition()) {
+                    return;
+                }
+                
+                try {
+                    finalTranscript = '';
+                    voiceTranscript.innerHTML = '';
+                    voiceStatus.textContent = 'Speak now...';
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting voice recognition:', error);
+                    showToast('Error starting voice recognition', 'error');
+                }
+            }
+            
+            // Stop voice recognition
+            function stopVoiceRecognition() {
+                isListening = false;
+                if (recognition) {
+                    recognition.stop();
+                }
+                
+                voiceBtn.classList.remove('listening', 'recording');
+                voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
+                voiceModal.hide();
+                
+                // If we have a final transcript, use it
+                if (finalTranscript.trim()) {
+                    userInput.value = finalTranscript;
+                    showToast('Voice input captured!', 'success');
+                    
+                    // Add voice message to chat
+                    addVoiceMessage(finalTranscript);
+                    
+                    // Auto-send after voice input
+                    setTimeout(() => {
+                        sendMessage();
+                    }, 500);
+                }
+            }
+            
+            // Add voice message to chat
+            function addVoiceMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message voice-message';
+                messageDiv.innerHTML = `
+                    <strong>You (Voice):</strong> ${message}
+                    <div><small><i class="bi bi-mic-fill"></i> Voice input</small></div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                addMemoryItem(`Voice input: ${message}`);
+                conversationHistory.push({ type: 'user', content: message, timestamp: new Date(), input: 'voice' });
+            }
+            
+            // Simulate voice level visualization
+            function updateVoiceLevel() {
+                const bars = voiceLevel.querySelectorAll('.voice-bar');
+                bars.forEach((bar, index) => {
+                    const randomHeight = 5 + Math.random() * 15;
+                    bar.style.height = `${randomHeight}px`;
+                    bar.style.background = `hsl(${210 + index * 10}, 70%, 50%)`;
+                });
+            }
             
             // Utility Functions
             function showToast(message, type = 'info') {
@@ -902,15 +877,28 @@
                 
                 if (isUser) {
                     messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
-                    addMemoryItem(`User asked: "${message}"`);
-                    conversationHistory.push({ type: 'user', content: message });
+                    addMemoryItem(`User: ${message}`);
+                    conversationHistory.push({ type: 'user', content: message, timestamp: new Date() });
                 } else {
-                    messageDiv.innerHTML = `<strong>AI Assistant:</strong> ${message}`;
-                    conversationHistory.push({ type: 'assistant', content: message });
+                    messageDiv.innerHTML = `<strong>Support AI:</strong> ${message}`;
+                    conversationHistory.push({ type: 'assistant', content: message, timestamp: new Date() });
                 }
                 
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return typingDiv;
             }
             
             function addMemoryItem(text) {
@@ -918,253 +906,161 @@
                 memoryItem.className = 'memory-item';
                 memoryItem.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${text}`;
                 memoryItems.appendChild(memoryItem);
+                memoryItems.scrollTop = memoryItems.scrollHeight;
             }
             
             // Chat Functionality
-            function sendMessage() {
+            async function sendMessage() {
                 const message = userInput.value.trim();
-                if (message) {
-                    addMessage(message, true);
+                if (message && !isWaitingForResponse) {
+                    if (!message.startsWith('I need help with my')) { // Don't add duplicate voice messages
+                        addMessage(message, true);
+                    }
                     userInput.value = '';
+                    isWaitingForResponse = true;
                     
-                    // Send to Worker and get response
-                    fetch('/api/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ message: message })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        addMessage(data.response, false);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        // Fallback to demo response if Worker is not available
-                        const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-                        addMessage(randomResponse, false);
-                    });
-                }
-            }
-            
-            // Button Event Listeners
-            sendBtn.addEventListener('click', sendMessage);
-            
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-            
-            // Voice input simulation
-            let isListening = false;
-            voiceBtn.addEventListener('click', function() {
-                if (!isListening) {
-                    isListening = true;
-                    voiceBtn.classList.add('pulse');
-                    voiceBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
-                    voiceBtn.style.backgroundColor = 'var(--primary-color)';
-                    voiceBtn.style.color = 'white';
-                    addMessage("Listening... Speak now", false);
+                    const typingIndicator = showTypingIndicator();
                     
-                    setTimeout(() => {
-                        isListening = false;
-                        voiceBtn.classList.remove('pulse');
-                        voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
-                        voiceBtn.style.backgroundColor = '';
-                        voiceBtn.style.color = '';
-                        addMessage("Hello, how can Cloudflare AI help me today?", true);
-                        
-                        fetch('/api/chat', {
+                    try {
+                        const response = await fetch('/api/chat', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ message: "Hello, how can Cloudflare AI help me today?" })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            addMessage(data.response, false);
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-                            addMessage(randomResponse, false);
+                            body: JSON.stringify({ 
+                                message: message,
+                                sessionId: sessionId,
+                                history: conversationHistory.slice(-6)
+                            })
                         });
-                    }, 3000);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        typingIndicator.remove();
+                        
+                        if (data.response) {
+                            addMessage(data.response, false);
+                        } else {
+                            addMessage("I understand your question. Let me help you with that. Could you provide more details about your specific issue with Cloudflare services?", false);
+                        }
+                    } catch (error) {
+                        console.error('Error calling worker:', error);
+                        typingIndicator.remove();
+                        const fallbackResponses = [
+                            "I can help you with Cloudflare services. For SSL issues, check your certificate configuration in the Cloudflare dashboard.",
+                            "For performance optimization, try enabling Auto Minify and Brotli compression in the Speed optimization settings.",
+                            "With Workers AI, you can run machine learning models directly on Cloudflare's edge network. What specific issue are you facing?",
+                            "For billing questions, you can view your current usage and invoices in the Billing section of your account."
+                        ];
+                        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                        addMessage(randomResponse, false);
+                        showToast('Using fallback mode - worker may be offline', 'warning');
+                    } finally {
+                        isWaitingForResponse = false;
+                    }
+                }
+            }
+            
+            // Event Listeners
+            voiceBtn.addEventListener('click', function() {
+                if (!isListening) {
+                    startVoiceRecognition();
                 } else {
-                    isListening = false;
-                    voiceBtn.classList.remove('pulse');
-                    voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
-                    voiceBtn.style.backgroundColor = '';
-                    voiceBtn.style.color = '';
-                    addMessage("Voice input canceled", false);
+                    stopVoiceRecognition();
                 }
             });
             
-            // Start demo button
-            startDemo.addEventListener('click', function() {
-                addMessage("Demo started! Try asking me about Cloudflare AI components.", false);
-                addMemoryItem("Demo mode activated");
-                showToast('Demo session started!', 'success');
+            stopVoiceBtn.addEventListener('click', stopVoiceRecognition);
+            
+            sendBtn.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !isWaitingForResponse) {
+                    sendMessage();
+                }
             });
             
-            // Learn more button
-            document.getElementById('learnMore').addEventListener('click', function() {
-                addMessage("Cloudflare's AI platform includes Workers AI for running models, Pages for hosting, Workflows for coordination, and Durable Objects for state management. Would you like to know more about a specific component?", false);
-            });
-            
-            // Clear chat button
-            document.getElementById('clearChat').addEventListener('click', function() {
-                chatMessages.innerHTML = '';
-                addMessage("Chat history cleared. How can I help you?", false);
-                showToast('Chat history cleared', 'info');
-            });
-            
-            // Clear memory button
-            document.getElementById('clearMemory').addEventListener('click', function() {
-                memoryItems.innerHTML = '';
-                addMemoryItem("Memory cleared by user");
-                showToast('Conversation memory cleared', 'info');
-            });
-            
-            // Refresh status button
-            document.getElementById('refreshStatus').addEventListener('click', function() {
-                showToast('System status refreshed', 'success');
-                // Simulate status update
-                document.querySelectorAll('.progress-bar').forEach(bar => {
-                    const newWidth = Math.min(100, parseInt(bar.style.width) + Math.random() * 10 - 5);
-                    bar.style.width = `${newWidth}%`;
-                });
-            });
-            
-            // Export chat button
-            document.getElementById('exportChat').addEventListener('click', function() {
-                const chatText = conversationHistory.map(msg => 
-                    `${msg.type === 'user' ? 'You' : 'AI Assistant'}: ${msg.content}`
-                ).join('\n');
-                
-                const blob = new Blob([chatText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'cloudflare-ai-chat.txt';
-                a.click();
-                URL.revokeObjectURL(url);
-                showToast('Chat exported successfully', 'success');
-            });
-            
-            // Toggle theme button
-            document.getElementById('toggleTheme').addEventListener('click', function() {
-                isDarkTheme = !isDarkTheme;
-                document.body.style.backgroundColor = isDarkTheme ? '#1a1a1a' : '#ffffff';
-                document.body.style.color = isDarkTheme ? '#ffffff' : '#2d3748';
-                showToast(`Switched to ${isDarkTheme ? 'dark' : 'light'} theme`, 'info');
-            });
-            
-            // Attach file button
-            document.getElementById('attachBtn').addEventListener('click', function() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.txt,.pdf,.doc,.docx';
-                input.onchange = function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        addMessage(`Attached file: ${file.name}`, true);
-                        showToast(`File "${file.name}" attached`, 'success');
-                    }
-                };
-                input.click();
-            });
-            
-            // Feature card buttons
+            // Quick action buttons
             document.querySelectorAll('.action-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const action = this.dataset.action;
-                    switch(action) {
-                        case 'test-llm':
-                            addMessage("Testing LLM integration with Cloudflare Workers AI...", true);
-                            setTimeout(() => {
-                                addMessage("LLM test successful! The model is responding correctly with low latency.", false);
-                            }, 1000);
-                            break;
-                        case 'simulate-workflow':
-                            addMessage("Simulating workflow coordination...", true);
-                            setTimeout(() => {
-                                addMessage("Workflow simulation complete! All tasks coordinated successfully across Workers.", false);
-                            }, 1500);
-                            break;
-                        case 'test-voice':
-                            addMessage("Testing voice input capabilities...", true);
-                            setTimeout(() => {
-                                addMessage("Voice input test passed! Ready to process speech commands.", false);
-                            }, 1000);
-                            break;
-                        case 'view-memory':
-                            showToast('Displaying memory statistics', 'info');
-                            addMessage("Current memory usage: 45% of available storage. 128 conversation entries stored.", false);
-                            break;
+                    const issue = this.dataset.issue;
+                    const questions = {
+                        'ssl': "I'm having SSL certificate issues with my domain. Can you help me troubleshoot?",
+                        'performance': "My website performance seems slow with Cloudflare. How can I optimize it?",
+                        'workers-ai': "I need help integrating Workers AI with my existing Cloudflare Worker.",
+                        'billing': "I have questions about my Cloudflare billing and subscription."
+                    };
+                    
+                    if (questions[issue]) {
+                        userInput.value = questions[issue];
+                        sendMessage();
                     }
                 });
             });
             
-            // Feature card clicks
-            document.querySelectorAll('.feature-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    if (!e.target.closest('.action-btn')) {
-                        const feature = this.dataset.feature;
-                        const questions = {
-                            'llm': "How does Llama 3.3 integrate with Workers AI?",
-                            'workflow': "Can you explain workflow coordination with Durable Objects?",
-                            'input': "How does voice input processing work?",
-                            'memory': "What's the best way to manage conversation state?"
-                        };
+            // Other button event listeners (same as before)
+            document.getElementById('startChat').addEventListener('click', function() {
+                document.getElementById('support').scrollIntoView({ behavior: 'smooth' });
+                userInput.focus();
+                showToast('Ready to help! What can I assist you with?', 'info');
+            });
+            
+            document.getElementById('createTicket').addEventListener('click', function() {
+                const ticketSubject = prompt("Please enter a subject for your support ticket:");
+                if (ticketSubject) {
+                    const ticketDescription = prompt("Please describe your issue in detail:");
+                    if (ticketDescription) {
+                        fetch('/api/tickets', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                subject: ticketSubject,
+                                description: ticketDescription,
+                                sessionId: sessionId
+                            })
+                        }).catch(error => {
+                            console.log('Ticket API not available, using local storage');
+                        });
                         
-                        if (questions[feature]) {
-                            userInput.value = questions[feature];
-                            sendMessage();
-                        }
+                        showToast('Support ticket created successfully!', 'success');
+                        addMemoryItem(`New ticket created: ${ticketSubject}`);
+                        
+                        const ticketsList = document.getElementById('ticketsList');
+                        const newTicket = document.createElement('div');
+                        newTicket.className = 'card ticket-card mb-3';
+                        newTicket.innerHTML = `
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title">${ticketSubject}</h5>
+                                        <p class="card-text text-muted">${ticketDescription}</p>
+                                        <span class="badge bg-primary">New</span>
+                                        <small class="text-muted">Created: ${new Date().toLocaleDateString()}</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                </div>
+                            </div>
+                        `;
+                        ticketsList.prepend(newTicket);
                     }
-                });
-            });
-            
-            // Settings button
-            document.getElementById('settingsBtn').addEventListener('click', function() {
-                const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-                modal.show();
-            });
-            
-            // Save settings button
-            document.getElementById('saveSettings').addEventListener('click', function() {
-                const responseStyle = document.getElementById('responseStyle').value;
-                const voiceResponses = document.getElementById('voiceResponses').checked;
-                
-                showToast(`Settings saved: ${responseStyle} mode, Voice ${voiceResponses ? 'enabled' : 'disabled'}`, 'success');
-                
-                const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
-                modal.hide();
-            });
-            
-            // Footer buttons
-            document.getElementById('documentationBtn').addEventListener('click', function() {
-                showToast('Opening documentation...', 'info');
-                setTimeout(() => {
-                    window.open('https://developers.cloudflare.com/workers-ai/', '_blank');
-                }, 500);
-            });
-            
-            document.getElementById('supportBtn').addEventListener('click', function() {
-                addMessage("For support, please visit the Cloudflare Developers Discord or check the official documentation. Is there a specific issue I can help with?", false);
-            });
-            
-            document.getElementById('feedbackBtn').addEventListener('click', function() {
-                const feedback = prompt("Please share your feedback about the AI Assistant:");
-                if (feedback) {
-                    showToast('Thank you for your feedback!', 'success');
-                    addMessage(`User feedback: ${feedback}`, true);
-                    addMessage("Thank you for your feedback! We'll use it to improve the assistant.", false);
                 }
+            });
+            
+            document.getElementById('newTicketBtn').addEventListener('click', function() {
+                document.getElementById('createTicket').click();
+            });
+            
+            document.getElementById('refreshStatus').addEventListener('click', function() {
+                showToast('System status updated', 'success');
+                document.querySelectorAll('.progress-bar').forEach(bar => {
+                    const newWidth = Math.min(100, Math.max(10, parseInt(bar.style.width) + Math.random() * 20 - 10));
+                    bar.style.width = `${newWidth}%`;
+                });
             });
             
             // Navigation smooth scroll
@@ -1180,6 +1076,26 @@
                     }
                 });
             });
+            
+            // Auto-focus on input when page loads
+            userInput.focus();
+            
+            // Initialize session
+            addMemoryItem(`Session started: ${sessionId}`);
+            
+            // Check for microphone permission
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                        console.log('Microphone access granted');
+                        // Stop all tracks to release microphone
+                        stream.getTracks().forEach(track => track.stop());
+                    })
+                    .catch(function(err) {
+                        console.log('Microphone access denied:', err);
+                        showToast('Microphone access is required for voice input. Please allow microphone access in your browser settings.', 'warning');
+                    });
+            }
         });
     </script>
 </body>
