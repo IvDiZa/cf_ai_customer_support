@@ -708,6 +708,7 @@
             let sessionId = 'session_' + Date.now();
             let conversationHistory = [];
             let isWaitingForResponse = false;
+            let voiceLevelInterval = null;
             
             // Initialize Speech Recognition
             function initializeSpeechRecognition() {
@@ -730,11 +731,13 @@
                     voiceBtn.classList.add('listening', 'recording');
                     voiceBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
                     voiceModal.show();
+                    startVoiceLevelAnimation();
                     showToast('Voice recognition started. Speak now!', 'info');
                 };
                 
                 recognition.onresult = function(event) {
                     let interimTranscript = '';
+                    finalTranscript = '';
                     
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         const transcript = event.results[i][0].transcript;
@@ -747,9 +750,6 @@
                     
                     // Update the transcript display
                     voiceTranscript.innerHTML = finalTranscript + '<em style="color: #666;">' + interimTranscript + '</em>';
-                    
-                    // Simulate voice level visualization
-                    updateVoiceLevel();
                 };
                 
                 recognition.onerror = function(event) {
@@ -777,11 +777,40 @@
                 recognition.onend = function() {
                     if (isListening) {
                         // If still listening, restart recognition (for continuous listening)
-                        recognition.start();
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.error('Error restarting recognition:', e);
+                            stopVoiceRecognition();
+                        }
                     }
                 };
                 
                 return true;
+            }
+            
+            // Start voice level animation
+            function startVoiceLevelAnimation() {
+                if (voiceLevelInterval) clearInterval(voiceLevelInterval);
+                
+                voiceLevelInterval = setInterval(() => {
+                    updateVoiceLevel();
+                }, 100);
+            }
+            
+            // Stop voice level animation
+            function stopVoiceLevelAnimation() {
+                if (voiceLevelInterval) {
+                    clearInterval(voiceLevelInterval);
+                    voiceLevelInterval = null;
+                }
+                
+                // Reset voice level bars
+                const bars = voiceLevel.querySelectorAll('.voice-bar');
+                bars.forEach(bar => {
+                    bar.style.height = '5px';
+                    bar.style.background = 'var(--primary-color)';
+                });
             }
             
             // Start voice recognition
@@ -805,49 +834,43 @@
             function stopVoiceRecognition() {
                 isListening = false;
                 if (recognition) {
-                    recognition.stop();
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.error('Error stopping recognition:', e);
+                    }
                 }
                 
                 voiceBtn.classList.remove('listening', 'recording');
                 voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
                 voiceModal.hide();
+                stopVoiceLevelAnimation();
                 
                 // If we have a final transcript, use it
                 if (finalTranscript.trim()) {
                     userInput.value = finalTranscript;
-                    showToast('Voice input captured!', 'success');
+                    showToast('Voice input captured! Click Send or press Enter.', 'success');
                     
-                    // Add voice message to chat
-                    addVoiceMessage(finalTranscript);
-                    
-                    // Auto-send after voice input
-                    setTimeout(() => {
-                        sendMessage();
-                    }, 500);
+                    // Auto-focus on input for quick sending
+                    userInput.focus();
+                } else {
+                    showToast('Voice recognition stopped', 'info');
                 }
-            }
-            
-            // Add voice message to chat
-            function addVoiceMessage(message) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message voice-message';
-                messageDiv.innerHTML = `
-                    <strong>You (Voice):</strong> ${message}
-                    <div><small><i class="bi bi-mic-fill"></i> Voice input</small></div>
-                `;
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                addMemoryItem(`Voice input: ${message}`);
-                conversationHistory.push({ type: 'user', content: message, timestamp: new Date(), input: 'voice' });
             }
             
             // Simulate voice level visualization
             function updateVoiceLevel() {
                 const bars = voiceLevel.querySelectorAll('.voice-bar');
                 bars.forEach((bar, index) => {
-                    const randomHeight = 5 + Math.random() * 15;
-                    bar.style.height = `${randomHeight}px`;
-                    bar.style.background = `hsl(${210 + index * 10}, 70%, 50%)`;
+                    // Create more natural voice level animation
+                    const baseHeight = 5;
+                    const variance = isListening ? Math.random() * 20 : 0;
+                    const height = baseHeight + variance;
+                    const hue = 210 + (index * 5);
+                    
+                    bar.style.height = `${height}px`;
+                    bar.style.background = `hsl(${hue}, 70%, 50%)`;
+                    bar.style.transition = 'height 0.1s ease';
                 });
             }
             
@@ -913,9 +936,7 @@
             async function sendMessage() {
                 const message = userInput.value.trim();
                 if (message && !isWaitingForResponse) {
-                    if (!message.startsWith('I need help with my')) { // Don't add duplicate voice messages
-                        addMessage(message, true);
-                    }
+                    addMessage(message, true);
                     userInput.value = '';
                     isWaitingForResponse = true;
                     
@@ -949,15 +970,23 @@
                     } catch (error) {
                         console.error('Error calling worker:', error);
                         typingIndicator.remove();
-                        const fallbackResponses = [
-                            "I can help you with Cloudflare services. For SSL issues, check your certificate configuration in the Cloudflare dashboard.",
-                            "For performance optimization, try enabling Auto Minify and Brotli compression in the Speed optimization settings.",
-                            "With Workers AI, you can run machine learning models directly on Cloudflare's edge network. What specific issue are you facing?",
-                            "For billing questions, you can view your current usage and invoices in the Billing section of your account."
-                        ];
-                        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-                        addMessage(randomResponse, false);
-                        showToast('Using fallback mode - worker may be offline', 'warning');
+                        
+                        // Enhanced fallback responses
+                        const lowerMessage = message.toLowerCase();
+                        let fallbackResponse = "I can help you with Cloudflare services. What specific issue are you facing?";
+                        
+                        if (lowerMessage.includes('ssl') || lowerMessage.includes('https')) {
+                            fallbackResponse = "For SSL issues, check your certificate configuration in the Cloudflare dashboard under the SSL/TLS tab.";
+                        } else if (lowerMessage.includes('performance') || lowerMessage.includes('slow')) {
+                            fallbackResponse = "For performance optimization, try enabling Auto Minify and Brotli compression in the Speed optimization settings.";
+                        } else if (lowerMessage.includes('worker') || lowerMessage.includes('ai')) {
+                            fallbackResponse = "With Workers AI, you can run machine learning models directly on Cloudflare's edge network. What specific issue are you facing?";
+                        } else if (lowerMessage.includes('billing')) {
+                            fallbackResponse = "For billing questions, you can view your current usage and invoices in the Billing section of your account.";
+                        }
+                        
+                        addMessage(fallbackResponse, false);
+                        showToast('Using enhanced fallback responses', 'info');
                     } finally {
                         isWaitingForResponse = false;
                     }
@@ -1001,7 +1030,7 @@
                 });
             });
             
-            // Other button event listeners (same as before)
+            // Other button event listeners
             document.getElementById('startChat').addEventListener('click', function() {
                 document.getElementById('support').scrollIntoView({ behavior: 'smooth' });
                 userInput.focus();
@@ -1013,6 +1042,7 @@
                 if (ticketSubject) {
                     const ticketDescription = prompt("Please describe your issue in detail:");
                     if (ticketDescription) {
+                        // Try to save via API, but continue either way
                         fetch('/api/tickets', {
                             method: 'POST',
                             headers: {
@@ -1030,6 +1060,7 @@
                         showToast('Support ticket created successfully!', 'success');
                         addMemoryItem(`New ticket created: ${ticketSubject}`);
                         
+                        // Add to tickets list
                         const ticketsList = document.getElementById('ticketsList');
                         const newTicket = document.createElement('div');
                         newTicket.className = 'card ticket-card mb-3';
@@ -1038,7 +1069,7 @@
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <h5 class="card-title">${ticketSubject}</h5>
-                                        <p class="card-text text-muted">${ticketDescription}</p>
+                                        <p class="card-text text-muted">${ticketDescription.substring(0, 100)}${ticketDescription.length > 100 ? '...' : ''}</p>
                                         <span class="badge bg-primary">New</span>
                                         <small class="text-muted">Created: ${new Date().toLocaleDateString()}</small>
                                     </div>
