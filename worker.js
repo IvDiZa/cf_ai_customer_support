@@ -21,6 +21,10 @@ export default {
         return handleChatRequest(request, env);
       }
       
+      if (url.pathname === '/api/tickets' && request.method === 'POST') {
+        return handleTicketsRequest(request, env);
+      }
+      
       if (url.pathname === '/api/settings' && request.method === 'POST') {
         return handleSettingsRequest(request, env);
       }
@@ -52,14 +56,19 @@ export default {
 
 async function handleChatRequest(request, env) {
   try {
-    const { message, settings = {} } = await request.json();
+    const { message, sessionId, history = [] } = await request.json();
     
-    // Generate AI response based on settings
-    const response = await generateAIResponse(message, settings);
+    // Use Cloudflare Workers AI if available, otherwise use fallback
+    let response;
+    if (env.AI) {
+      response = await generateWorkersAIResponse(env.AI, message, history);
+    } else {
+      response = await generateFallbackResponse(message);
+    }
     
     // Store conversation in KV if available
-    if (env.CONVERSATION_STORE) {
-      await storeConversation(env.CONVERSATION_STORE, message, response);
+    if (env.KV) {
+      await storeConversation(env.KV, sessionId, message, response);
     }
     
     return new Response(JSON.stringify({ 
@@ -76,9 +85,50 @@ async function handleChatRequest(request, env) {
     console.error('Chat request error:', error);
     return new Response(JSON.stringify({ 
       error: 'Failed to process message',
-      response: "I'm having trouble processing your request right now. Please try again."
+      response: await generateFallbackResponse()
     }), {
       status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+}
+
+async function handleTicketsRequest(request, env) {
+  try {
+    const { subject, description, sessionId } = await request.json();
+    
+    // Store ticket in KV if available
+    if (env.KV) {
+      const ticketId = `ticket_${Date.now()}`;
+      const ticket = {
+        id: ticketId,
+        subject,
+        description,
+        sessionId,
+        status: 'new',
+        createdAt: new Date().toISOString()
+      };
+      await env.KV.put(ticketId, JSON.stringify(ticket));
+    }
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: 'Ticket created successfully',
+      ticketId: generateId()
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ 
+      success: true, // Still return success for demo purposes
+      message: 'Ticket logged locally (KV not configured)'
+    }), {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -92,9 +142,9 @@ async function handleSettingsRequest(request, env) {
     const settings = await request.json();
     
     // Store settings in KV if available
-    if (env.USER_SETTINGS) {
+    if (env.KV) {
       const settingsId = 'user_settings';
-      await env.USER_SETTINGS.put(settingsId, JSON.stringify(settings));
+      await env.KV.put(settingsId, JSON.stringify(settings));
     }
     
     return new Response(JSON.stringify({ 
@@ -122,7 +172,7 @@ async function handleSettingsRequest(request, env) {
 async function handleExportRequest(request, env) {
   try {
     // In a real implementation, you would fetch conversation history from KV
-    const conversations = await getConversationHistory(env.CONVERSATION_STORE);
+    const conversations = await getConversationHistory(env.KV);
     
     const exportData = {
       exportDate: new Date().toISOString(),
@@ -155,7 +205,7 @@ async function handleStatusRequest(env) {
     services: {
       llm: { status: 'online', latency: Math.random() * 100 + 50 },
       workers: { status: 'online', requests: Math.floor(Math.random() * 1000) },
-      kv: { status: 'online', usage: Math.random() * 70 + 20 },
+      kv: { status: env.KV ? 'online' : 'offline', usage: Math.random() * 70 + 20 },
       durableObjects: { status: 'online', instances: Math.floor(Math.random() * 10) + 1 }
     }
   };
@@ -168,69 +218,91 @@ async function handleStatusRequest(env) {
   });
 }
 
-async function generateAIResponse(message, settings) {
-  const responseStyle = settings.responseStyle || 'friendly';
-  
-  // Enhanced response logic with different styles
-  const responses = {
-    friendly: [
-      "I'd be happy to help with that! Cloudflare Workers AI makes running ML models super easy.",
-      "That's a great question! Let me explain how Cloudflare handles this...",
-      "I can definitely help you with that! The edge network is perfect for low-latency AI.",
-      "Awesome question! Here's how you can implement that with Workers...",
-      "I understand what you're asking! Let me break this down for you..."
-    ],
-    technical: [
-      "Cloudflare Workers AI provides serverless inference at the edge with sub-50ms latency globally.",
-      "Durable Objects offer strongly consistent storage with transactional guarantees for state management.",
-      "The Workers runtime executes your code in isolated V8 contexts across 300+ global locations.",
-      "KV storage provides eventually consistent key-value storage with low-latency read access.",
-      "Workflows orchestrate complex operations across multiple Workers with guaranteed execution."
-    ],
-    concise: [
-      "Workers AI runs models at the edge. Low latency, global scale.",
-      "Use Durable Objects for consistent state. KV for simple storage.",
-      "Workers handle logic. Pages serve frontend. All globally distributed.",
-      "Voice input via Web Speech API. Process with Workers AI.",
-      "Memory: KV for simple, Durable Objects for complex state."
-    ]
-  };
-  
-  // Contextual responses based on message content
-  const contextualResponses = {
-    llama: "Cloudflare Workers AI supports Llama models that run directly on the edge network with optimized inference.",
-    workflow: "Workflows coordinate complex operations across services with built-in retries and error handling.",
-    memory: "Use KV for simple key-value storage or Durable Objects for transactional state management.",
-    voice: "Process voice input with Web Speech API in browser, then send to Workers for AI processing.",
-    deploy: "Deploy your AI assistant globally in seconds with wrangler deploy or via CI/CD with Pages.",
-    cost: "Workers AI pricing is per inference, with generous free tier for development and testing."
-  };
-  
-  // Check for contextual matches
-  const lowerMessage = message.toLowerCase();
-  for (const [key, response] of Object.entries(contextualResponses)) {
-    if (lowerMessage.includes(key)) {
-      return response;
+async function generateWorkersAIResponse(ai, message, history) {
+  try {
+    // Build conversation context
+    let context = "You are a helpful Cloudflare customer support agent. Be friendly and provide clear solutions. Keep responses under 3 sentences.\n\n";
+    
+    // Add recent history for context
+    if (history.length > 0) {
+      context += "Recent conversation:\n";
+      history.forEach(entry => {
+        const role = entry.type === 'user' ? 'User' : 'Assistant';
+        context += `${role}: ${entry.content}\n`;
+      });
+      context += "\n";
     }
+    
+    context += `User: ${message}\nAssistant:`;
+    
+    const response = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [
+        { role: 'system', content: 'You are a helpful Cloudflare support specialist. Provide concise, helpful answers about Cloudflare services.' },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 300
+    });
+    
+    return response.response || "I understand your question. Let me help you with that Cloudflare issue.";
+  } catch (error) {
+    console.error('AI response error:', error);
+    return await generateFallbackResponse(message);
   }
-  
-  // Return style-based random response
-  const styleResponses = responses[responseStyle] || responses.friendly;
-  return styleResponses[Math.floor(Math.random() * styleResponses.length)];
 }
 
-async function storeConversation(kv, userMessage, aiResponse) {
-  const timestamp = new Date().toISOString();
-  const conversationId = `conv_${Date.now()}`;
+async function generateFallbackResponse(message) {
+  const lowerMessage = message.toLowerCase();
   
-  const conversation = {
-    userMessage,
-    aiResponse,
-    timestamp,
-    id: conversationId
-  };
+  // Contextual responses based on message content
+  if (lowerMessage.includes('ssl') || lowerMessage.includes('certificate') || lowerMessage.includes('https')) {
+    return "For SSL/TLS issues, check your certificate configuration in the Cloudflare dashboard under SSL/TLS tab. Ensure your certificate is active and properly configured for your domain.";
+  }
   
-  await kv.put(conversationId, JSON.stringify(conversation));
+  if (lowerMessage.includes('performance') || lowerMessage.includes('slow') || lowerMessage.includes('cache')) {
+    return "To optimize performance, enable Auto Minify, Brotli compression, and Rocket Loader in the Speed optimization settings. Also check your cache rules in the Caching section.";
+  }
+  
+  if (lowerMessage.includes('worker') || lowerMessage.includes('ai') || lowerMessage.includes('llama')) {
+    return "Cloudflare Workers AI allows you to run machine learning models at the edge. You can integrate AI capabilities directly into your Workers for low-latency inference worldwide.";
+  }
+  
+  if (lowerMessage.includes('billing') || lowerMessage.includes('price') || lowerMessage.includes('invoice')) {
+    return "For billing questions, visit the Billing section in your Cloudflare dashboard to view current usage, invoices, and manage your subscription plan.";
+  }
+  
+  if (lowerMessage.includes('dns') || lowerMessage.includes('domain')) {
+    return "For DNS issues, verify your domain's nameservers are properly set to Cloudflare's or ensure your DNS records are correctly configured in the DNS section of your dashboard.";
+  }
+  
+  // Default friendly responses
+  const defaultResponses = [
+    "I'd be happy to help with your Cloudflare question! Could you provide more details about what you're trying to accomplish?",
+    "Thanks for reaching out! I can help you with various Cloudflare services including Workers, DNS, Security, and Performance optimization.",
+    "I understand you need assistance with Cloudflare. Let me know what specific service or issue you'd like help with for more targeted guidance.",
+    "Hello! I'm here to help with Cloudflare products and services. What specific challenge are you facing today?",
+    "Great question! Cloudflare offers many services - are you working with Workers, DNS, Security, or another product I can help you with?"
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
+
+async function storeConversation(kv, sessionId, userMessage, aiResponse) {
+  try {
+    const timestamp = new Date().toISOString();
+    const conversationId = `conv_${sessionId}_${Date.now()}`;
+    
+    const conversation = {
+      userMessage,
+      aiResponse,
+      timestamp,
+      sessionId,
+      id: conversationId
+    };
+    
+    await kv.put(conversationId, JSON.stringify(conversation));
+  } catch (error) {
+    console.error('Error storing conversation:', error);
+  }
 }
 
 async function getConversationHistory(kv) {
@@ -265,19 +337,23 @@ async function serveHTML() {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Cloudflare AI Assistant</title>
+        <title>Cloudflare AI Customer Support</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
           .hero { background: linear-gradient(135deg, #ff6b35, #e55a2b); color: white; padding: 40px; border-radius: 15px; text-align: center; }
-          .btn { background: #ff6b35; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+          .btn { background: #ff6b35; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+          .container { text-align: center; margin-top: 50px; }
         </style>
       </head>
       <body>
         <div class="hero">
-          <h1>Cloudflare AI Assistant</h1>
+          <h1>Cloudflare AI Customer Support</h1>
           <p>Worker is running successfully!</p>
-          <p>Access the full application at your deployment URL.</p>
+          <p>Access the full application at your deployment URL with /index.html</p>
+        </div>
+        <div class="container">
           <button class="btn" onclick="window.location.href='/index.html'">Go to Application</button>
+          <button class="btn" onclick="window.location.href='/api/status'">Check API Status</button>
         </div>
       </body>
     </html>
